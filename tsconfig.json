@@ -15,7 +15,11 @@
 
     // <div /> => React.createElement("div")
     "jsx": "react",
-    
+
+    // cf. https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33311
+    // cf. https://stackoverflow.com/a/55540896
+    "skipLibCheck": true,
+
     // Only for type checks.
     "incremental": true,
     "outDir": "./.ts-cache/",
