@@ -41,4 +41,3 @@ export const DangerButton = styled(Button)`
     border-color: ${color.Maroon};
   }
 `
-

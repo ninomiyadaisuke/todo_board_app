@@ -16,7 +16,7 @@ export const CardFilter = ({
       <Input
         placeholder="Filter cards"
         value={value}
-        onChange={(ev) => onChange(ev.currentTarget.value )}
+        onChange={(ev) => onChange(ev.currentTarget.value)}
       />
     </Container>
   )
