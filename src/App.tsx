@@ -1,34 +1,96 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
+import produce from 'immer'
 import { Header as _Header } from './Header'
 import { Column } from './Column'
 
 export const App = () => {
+  const [filterValue, setFilterValue] = useState('')
+  const [columns, setColumns] = useState([
+    {
+      id: 'A',
+      title: 'TODO',
+      cards: [
+        { id: 'a', text: '朝食をとる🍞' },
+        { id: 'b', text: 'SNSをチェックする🐦' },
+        { id: 'c', text: '布団に入る (:3[___]' },
+      ],
+    },
+    {
+      id: 'B',
+      title: 'Doing',
+      cards: [
+        { id: 'd', text: '顔を洗う👐' },
+        { id: 'e', text: '歯を磨く🦷' },
+      ],
+    },
+    {
+      id: 'C',
+      title: 'Waiting',
+      cards: [],
+    },
+    {
+      id: 'D',
+      title: 'Done',
+      cards: [{ id: 'f', text: '布団から出る (:3っ)っ -=三[＿＿]' }],
+    },
+  ])
+
+  const [draggingCardID, setDraggingCardID] = useState<string | undefined>(
+    undefined,
+  )
+
+  const dropCardTo = (toID: string) => {
+    const cardID = draggingCardID
+    if (!cardID) return
+    setDraggingCardID(undefined)
+    if (cardID === toID) return
+    //columnsの型を定義
+    type Columns = typeof columns
+    setColumns(
+      produce((columns: Columns) => {
+        const card = columns
+          .flatMap((col) => col.cards)
+          .find((c) => c.id === cardID)
+        if (!card) return
+
+        const fromColumn = columns.find((col) =>
+          col.cards.some((c) => c.id === cardID),
+        )
+        if (!fromColumn) return
+
+        fromColumn.cards = fromColumn.cards.filter((c) => c.id !== cardID)
+
+        const toColumn = columns.find(
+          (col) => col.id === toID || col.cards.some((c) => c.id === toID),
+        )
+        if (!toColumn) return
+
+        let index = toColumn.cards.findIndex((c) => c.id === toID)
+        if (index < 0) {
+          index = toColumn.cards.length
+        }
+        toColumn.cards.splice(index, 0, card)
+      }),
+    )
+  }
+
   return (
     <Container>
-      <Header />
+      <Header filterValue={filterValue} onFilterChange={setFilterValue} />
+
       <MainArea>
         <HorizontalScroll>
-          <Column
-            title="TODO"
-            cards={[
-              { id: 'a', text: '朝食をとる🍞' },
-              { id: 'b', text: 'SNSをチェックする🐦' },
-              { id: 'c', text: '布団に入る (:3[___]' },
-            ]}
-          />
-          <Column
-            title="Doing"
-            cards={[
-              { id: 'd', text: '顔を洗う👐' },
-              { id: 'e', text: '歯を磨く🦷' },
-            ]}
-          />
-          <Column title="Waiting" cards={[]} />
-          <Column
-            title="Done"
-            cards={[{ id: 'f', text: '布団から出る (:3っ)っ -=三[＿＿]' }]}
-          />
+          {columns.map(({ id: columnID, title, cards }) => (
+            <Column
+              key={columnID}
+              title={title}
+              filterValue={filterValue}
+              cards={cards}
+              onCardDragStart={(cardID) => setDraggingCardID(cardID)}
+              onCardDrop={(entered) => dropCardTo(entered ?? columnID)}
+            />
+          ))}
         </HorizontalScroll>
       </MainArea>
     </Container>
@@ -67,3 +129,46 @@ const HorizontalScroll = styled.div`
     content: '';
   }
 `
+
+// const dropCardTo = (toID: string) => {
+//   const cardID = draggingCardID
+//   if (!cardID) return
+//   setDraggingCardID(undefined)
+//   if (cardID === toID) return
+//   setColumns((columns) => {
+//     //選択されたカード情報を抽出(オブジェクトで)
+//     const card = columns
+//       .flatMap((col) => col.cards)
+//       .find((c) => c.id === cardID)
+//     if (!card) {
+//       return columns
+//     }
+//     return columns.map((column) => {
+//       let newColumn = column
+//       //カラムからカードを消されたときの処理
+//       if (newColumn.cards.some((c) => c.id === cardID)) {
+//         newColumn = {
+//           ...newColumn,
+//           cards: newColumn.cards.filter((c) => c.id !== cardID),
+//         }
+//       }
+//       // // 列の末尾に移動
+//       if (newColumn.id === toID) {
+//         newColumn = {
+//           ...newColumn,
+//           cards: [...newColumn.cards, card],
+//         }
+//       }
+//       // 列の末尾以外に移動
+//       else if (newColumn.cards.some((c) => c.id === toID)) {
+//         newColumn = {
+//           ...newColumn,
+//           cards: newColumn.cards.flatMap((c) =>
+//             c.id === toID ? [card, c] : [c],
+//           ),
+//         }
+//       }
+//       return newColumn
+//     })
+//   })
+// }

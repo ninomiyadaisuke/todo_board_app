@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import styled from 'styled-components'
 import * as color from './color'
 import { Button, ConfirmButton } from './Button'
@@ -22,9 +22,12 @@ export const InputForm = ({
     onConfirm?.()
   }
 
+  const ref = useAutoFitToContentHeight(value)
+
   return (
     <Container className={className}>
       <Input
+        ref={ref}
         autoFocus
         placeholder="Enter a note"
         value={value}
@@ -40,6 +43,19 @@ export const InputForm = ({
       </ButtonRow>
     </Container>
   )
+}
+
+const useAutoFitToContentHeight = (content: string | undefined) => {
+  const ref = useRef<HTMLTextAreaElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const { borderTopWidth, borderBottomWidth } = getComputedStyle(el)
+    el.style.height = 'auto'
+    el.style.height = `calc(${borderTopWidth} + ${el.scrollHeight}px + ${borderBottomWidth})`
+  }, [content])
+
+  return ref
 }
 
 const Container = styled.div``
