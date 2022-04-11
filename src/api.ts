@@ -32,7 +32,6 @@ export type ReqAndRes = {
   }
 }
 
-
 export const Endpoint = process.env.API_ENDPOINT || 'http://localhost:3000/api'
 
 export async function api<K extends keyof ReqAndRes>(
@@ -68,21 +67,21 @@ export async function api<K extends keyof ReqAndRes>(
       break
   }
 
-  return fetch(`${Endpoint}${pathWithID || path}`, option).then(res =>
+  return fetch(`${Endpoint}${pathWithID || path}`, option).then((res) =>
     res.ok
       ? res.json()
-      : res.text().then(text => {
-        throw new APIError(
-          method,
-          res.url,
-          res.status,
-          res.statusText,
-          res.ok,
-          res.redirected,
-          res.type,
-          text,
-        )
-      }),
+      : res.text().then((text) => {
+          throw new APIError(
+            method,
+            res.url,
+            res.status,
+            res.statusText,
+            res.ok,
+            res.redirected,
+            res.type,
+            text,
+          )
+        }),
   )
 }
 

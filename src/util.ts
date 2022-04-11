@@ -22,10 +22,9 @@ export function randomID() {
  * @param head リストの先頭のキー
  */
 
-
 export function sortBy<
   E extends { id: Exclude<V, null> },
-  V extends string | null
+  V extends string | null,
 >(list: E[], order: Record<string, V>, head: Exclude<V, null>) {
   const map = list.reduce((m, e) => m.set(e.id, e), new Map<V, E>())
 
