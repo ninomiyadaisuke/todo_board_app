@@ -33,7 +33,6 @@ export const Column = ({
   onTextConfirm(): void
   onTextCancel(): void
 }) => {
-  //
   const filterValue = rawFilterValue?.trim()
   const keywords = filterValue?.toLocaleLowerCase().split(/\s+/g) ?? []
   const cards = rawCards?.filter(({ text }) =>

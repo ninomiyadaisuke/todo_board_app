@@ -29,6 +29,13 @@ export type ReqAndRes = {
     }
   }
 
+  'DELETE /v1/cards': {
+    req: {
+      id: CardID
+    }
+    res: {}
+  }
+
   'GET /v1/cardsOrder': {
     req: null
     res: Record<string, CardID | ColumnID>
@@ -79,17 +86,17 @@ export async function api<K extends keyof ReqAndRes>(
     res.ok
       ? res.json()
       : res.text().then((text) => {
-        throw new APIError(
-          method,
-          res.url,
-          res.status,
-          res.statusText,
-          res.ok,
-          res.redirected,
-          res.type,
-          text,
-        )
-      }),
+          throw new APIError(
+            method,
+            res.url,
+            res.status,
+            res.statusText,
+            res.ok,
+            res.redirected,
+            res.type,
+            text,
+          )
+        }),
   )
 }
 

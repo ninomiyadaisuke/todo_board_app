@@ -25,7 +25,7 @@ export function randomID() {
 export function sortBy<
   E extends { id: Exclude<V, null> },
   V extends string | null,
-  >(list: E[], order: Record<string, V>, head: Exclude<V, null>) {
+>(list: E[], order: Record<string, V>, head: Exclude<V, null>) {
   const map = list.reduce((m, e) => m.set(e.id, e), new Map<V, E>())
 
   const sorted: typeof list = []
@@ -42,7 +42,6 @@ export function sortBy<
 
   return sorted
 }
-
 
 /**
  * リストの順序情報を並べ替える PATCH リクエストのための情報を生成する
@@ -66,7 +65,8 @@ export function reorderPatch<V extends string | null>(
     patch[deleteKey] = order[id]
   }
 
-  const [insertKey] = Object.entries(order).find(([, v]) => v && v === toID) || []
+  const [insertKey] =
+    Object.entries(order).find(([, v]) => v && v === toID) || []
   if (insertKey) {
     patch[insertKey] = id as V
   }
