@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import produce from 'immer'
+import { randomID } from './util'
+import { api } from './api'
 import { Header as _Header } from './Header'
 import { Column } from './Column'
 import { DeleteDialog } from './DeleteDialog'
@@ -12,6 +14,7 @@ export const App = () => {
     {
       id: 'A',
       title: 'TODO',
+      text: '',
       cards: [
         { id: 'a', text: '朝食をとる🍞' },
         { id: 'b', text: 'SNSをチェックする🐦' },
@@ -21,6 +24,7 @@ export const App = () => {
     {
       id: 'B',
       title: 'Doing',
+      text: '',
       cards: [
         { id: 'd', text: '顔を洗う👐' },
         { id: 'e', text: '歯を磨く🦷' },
@@ -29,11 +33,13 @@ export const App = () => {
     {
       id: 'C',
       title: 'Waiting',
+      text: '',
       cards: [],
     },
     {
       id: 'D',
       title: 'Done',
+      text: '',
       cards: [{ id: 'f', text: '布団から出る (:3っ)っ -=三[＿＿]' }],
     },
   ])
@@ -44,6 +50,43 @@ export const App = () => {
   const [deletingCardID, setDeletingCardID] = useState<string | undefined>(
     undefined,
   )
+
+  const setText = (columnsID: string, value: string) => {
+    type Columns = typeof columns
+    setColumns(
+      produce((columns: Columns) => {
+        const column = columns.find((c) => c.id === columnsID)
+        if (!column) return
+        column.text = value
+      }),
+    )
+  }
+
+  const addCard = (columnID: string) => {
+    const column = columns.find(c => c.id === columnID)
+    if (!column) return
+
+    const text = column.text
+    const cardID = randomID()
+
+    type Columns = typeof columns
+    setColumns(
+      produce((columns: Columns) => {
+        const column = columns.find((c) => c.id === columnID)
+        if (!column) return
+
+        column.cards.unshift({
+          id: cardID,
+          text: column.text,
+        })
+        column.text = ''
+      }),
+    )
+    api('POST /v1/cards', {
+      id: cardID,
+      text,
+    })
+  }
 
   const deleteCard = () => {
     const cardID = deletingCardID
@@ -79,14 +122,11 @@ export const App = () => {
           col.cards.some((c) => c.id === cardID),
         )
         if (!fromColumn) return
-
         fromColumn.cards = fromColumn.cards.filter((c) => c.id !== cardID)
-
         const toColumn = columns.find(
           (col) => col.id === toID || col.cards.some((c) => c.id === toID),
         )
         if (!toColumn) return
-
         let index = toColumn.cards.findIndex((c) => c.id === toID)
         if (index < 0) {
           index = toColumn.cards.length
@@ -102,7 +142,7 @@ export const App = () => {
 
       <MainArea>
         <HorizontalScroll>
-          {columns.map(({ id: columnID, title, cards }) => (
+          {columns.map(({ id: columnID, title, cards, text }) => (
             <Column
               key={columnID}
               title={title}
@@ -111,6 +151,9 @@ export const App = () => {
               onCardDragStart={(cardID) => setDraggingCardID(cardID)}
               onCardDrop={(entered) => dropCardTo(entered ?? columnID)}
               onCardDeleteClick={(cardID) => setDeletingCardID(cardID)}
+              text={text}
+              onTextChange={(value) => setText(columnID, value)}
+              onTextConfirm={() => addCard(columnID)}
             />
           ))}
         </HorizontalScroll>
