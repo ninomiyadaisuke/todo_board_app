@@ -20,6 +20,7 @@ export const InputForm = ({
   const handleConfirm = () => {
     if (disabled) return
     onConfirm?.()
+    onCancel?.()
   }
 
   const ref = useAutoFitToContentHeight(value)

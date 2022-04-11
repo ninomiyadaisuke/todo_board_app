@@ -16,7 +16,7 @@ export const Column = ({
   text,
   onTextChange,
   onTextConfirm,
-  onTextCancel,
+  // onTextCancel,
 }: {
   title?: string
   filterValue?: string
@@ -31,7 +31,7 @@ export const Column = ({
   text?: string
   onTextChange(value: string): void
   onTextConfirm(): void
-  onTextCancel(): void
+  // onTextCancel(): void
 }) => {
   const filterValue = rawFilterValue?.trim()
   const keywords = filterValue?.toLocaleLowerCase().split(/\s+/g) ?? []
@@ -50,7 +50,7 @@ export const Column = ({
   }
   const cancelInput = () => {
     setInputMode(false)
-    onTextCancel()
+    // onTextCancel?.()
   }
 
   const handleCardDragStart = (id: CardID) => {
