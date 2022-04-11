@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import produce from 'immer'
-import { randomID, sortBy } from './util'
-import { api } from './api'
+import { randomID, sortBy, reorderPatch } from './util'
+import { api, ColumnID, CardID } from './api'
 import { Header as _Header } from './Header'
 import { Column } from './Column'
 import { DeleteDialog } from './DeleteDialog'
@@ -10,26 +10,24 @@ import { Overlay as _Overlay } from './Overlay'
 
 type State = {
   columns?: {
-    id: string
+    id: ColumnID
     title?: string
     text?: string
     cards?: {
-      id: string
+      id: CardID
       text?: string
     }[]
   }[]
-  cardsOrder: Record<string, string>
+  cardsOrder: Record<string, CardID | ColumnID>
 }
 
 export const App = () => {
   const [filterValue, setFilterValue] = useState('')
-  const [draggingCardID, setDraggingCardID] = useState<string | undefined>(
+  const [draggingCardID, setDraggingCardID] = useState<CardID | undefined>(
     undefined,
   )
-  const [deletingCardID, setDeletingCardID] = useState<string | undefined>(
-    undefined,
-  )
-  const [{ columns }, setData] = useState<State>({ cardsOrder: {} })
+
+  const [{ columns, cardsOrder }, setData] = useState<State>({ cardsOrder: {} })
 
   useEffect(() => {
     ;(async () => {
@@ -56,7 +54,36 @@ export const App = () => {
     })()
   }, [])
 
-  const setText = (columnID: string, value: string) => {
+  const [deletingCardID, setDeletingCardID] = useState<CardID | undefined>(
+    undefined,
+  )
+
+  const dropCardTo = (toID: CardID | ColumnID) => {
+    const cardID = draggingCardID
+    if (!cardID) return
+    setDraggingCardID(undefined)
+    if (cardID === toID) return
+
+    const patch = reorderPatch(cardsOrder, cardID, toID)
+    //columnsの型を定義
+    setData(
+      produce((draft: State) => {
+        draft.cardsOrder = {
+          ...draft.cardsOrder,
+          ...patch,
+        }
+
+        const unorderedCards =
+          draft.columns?.flatMap((c) => c.cards ?? []) ?? []
+        draft.columns?.forEach((column) => {
+          column.cards = sortBy(unorderedCards, draft.cardsOrder, column.id)
+        })
+      }),
+    )
+    api('PATCH /v1/cardsOrder', patch)
+  }
+
+  const setText = (columnID: ColumnID, value: string) => {
     setData(
       produce((draft: State) => {
         const column = draft.columns?.find((c) => c.id === columnID)
@@ -66,28 +93,34 @@ export const App = () => {
     )
   }
 
-  const addCard = (columnID: string) => {
+  const addCard = (columnID: ColumnID) => {
     const column = columns?.find((c) => c.id === columnID)
     if (!column) return
 
     const text = column.text
-    const cardID = randomID()
+    const cardID = randomID() as CardID
+    const patch = reorderPatch(cardsOrder, cardID, cardsOrder[columnID])
     setData(
       produce((draft: State) => {
         const column = draft.columns?.find((c) => c.id === columnID)
-        if (!column) return
+        if (!column?.cards) return
 
-        column.cards?.unshift({
+        column.cards.unshift({
           id: cardID,
           text: column.text,
         })
         column.text = ''
+        draft.cardsOrder = {
+          ...draft.cardsOrder,
+          ...patch,
+        }
       }),
     )
     api('POST /v1/cards', {
       id: cardID,
       text,
     })
+    api('PATCH /v1/cardsOrder', patch)
   }
 
   const deleteCard = () => {
@@ -101,37 +134,6 @@ export const App = () => {
         )
         if (!column) return
         column.cards = column.cards?.filter((c) => c.id !== cardID)
-      }),
-    )
-  }
-
-  const dropCardTo = (toID: string) => {
-    const cardID = draggingCardID
-    if (!cardID) return
-    setDraggingCardID(undefined)
-    if (cardID === toID) return
-    //columnsの型を定義
-    setData(
-      produce((draft: State) => {
-        const card = draft.columns
-          ?.flatMap((col) => col.cards ?? [])
-          .find((c) => c.id === cardID)
-        if (!card) return
-
-        const fromColumn = draft.columns?.find((col) =>
-          col.cards?.some((c) => c.id === cardID),
-        )
-        if (!fromColumn?.cards) return
-        fromColumn.cards = fromColumn.cards.filter((c) => c.id !== cardID)
-        const toColumn = draft.columns?.find(
-          (col) => col.id === toID || col.cards?.some((c) => c.id === toID),
-        )
-        if (!toColumn?.cards) return
-        let index = toColumn.cards.findIndex((c) => c.id === toID)
-        if (index < 0) {
-          index = toColumn.cards.length
-        }
-        toColumn.cards.splice(index, 0, card)
       }),
     )
   }

@@ -4,6 +4,7 @@ import * as color from './color'
 import { Card } from './Card'
 import { PlusIcon } from './icon'
 import { InputForm as _InputForm } from './InputForm'
+import { CardID } from './api'
 
 export const Column = ({
   title,
@@ -21,12 +22,12 @@ export const Column = ({
   filterValue?: string
   cards?: {
     title?: string
-    id: string
+    id: CardID
     text?: string
   }[]
-  onCardDragStart?(id: string): void
-  onCardDrop?(entered: string | null): void
-  onCardDeleteClick: (cardID: string) => void
+  onCardDragStart?(id: CardID): void
+  onCardDrop?(entered: CardID | null): void
+  onCardDeleteClick: (cardID: CardID) => void
   text?: string
   onTextChange(value: string): void
   onTextConfirm(): void
@@ -40,7 +41,7 @@ export const Column = ({
   )
   const totalCount = rawCards?.length as number
   const [inputMode, setInputMode] = useState(false)
-  const [draggingCardID, setDraggingCardID] = useState<string | undefined>(
+  const [draggingCardID, setDraggingCardID] = useState<CardID | undefined>(
     undefined,
   )
   const toggleInput = () => setInputMode((v) => !v)
@@ -53,7 +54,7 @@ export const Column = ({
     onTextCancel()
   }
 
-  const handleCardDragStart = (id: string) => {
+  const handleCardDragStart = (id: CardID) => {
     setDraggingCardID(id)
     onCardDragStart?.(id)
   }
