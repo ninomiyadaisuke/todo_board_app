@@ -16,8 +16,8 @@ export const Column = ({
   text,
   onTextChange,
   onTextConfirm,
-  // onTextCancel,
-}: {
+}: // onTextCancel,
+{
   title?: string
   filterValue?: string
   cards?: {

@@ -50,21 +50,22 @@ export type ReqAndRes = {
 export const Endpoint = process.env.API_ENDPOINT || 'http://localhost:3000/api'
 
 export async function api<K extends keyof ReqAndRes>(
-  key: K,
-  payload: ReqAndRes[K]['req'],
+  key: K, //GET /v1/columnsなど
+  payload: ReqAndRes[K]['req'], //{id: 'Od04UtMK8RSs', text: 'てすと'}など
 ): Promise<ReqAndRes[K]['res']> {
-  const [method, path] = key.split(' ')
+  const [method, path] = key.split(' ') //GET と /v1/columnsを分割
   if (!method || !path) {
     throw new Error(`Unrecognized api: ${key}`)
   }
 
   let pathWithID = ''
   const option: RequestInit = { method }
+
   switch (option.method) {
     case 'GET':
     case 'DELETE':
       if (payload && 'id' in payload) {
-        pathWithID = `${path}/${payload.id}`
+        pathWithID = `${path}/${payload.id}` // 個別パスを取得 /v1/cards/Od04UtMK8RSs 削除
       }
       break
 

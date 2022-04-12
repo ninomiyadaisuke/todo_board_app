@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import { useDispatch, useSelector } from 'react-redux'
 import produce from 'immer'
 import { randomID, sortBy, reorderPatch } from './util'
 import { api, ColumnID, CardID } from './api'
@@ -22,22 +23,33 @@ type State = {
 }
 
 export const App = () => {
-  const [filterValue, setFilterValue] = useState('')
+  const dispatch = useDispatch()
+  const filterValue = useSelector((state) => state.filterValue)
+  const setFilterValue = (value: string) => {
+    dispatch({
+      type: 'Filter.SetFilter',
+      payload: {
+        value,
+      },
+    })
+  }
   const [draggingCardID, setDraggingCardID] = useState<CardID | undefined>(
     undefined,
   )
 
   const [{ columns, cardsOrder }, setData] = useState<State>({ cardsOrder: {} })
 
+  //columns cards cardsOrderを取得
   useEffect(() => {
     ;(async () => {
+      //columnsを取得しセットする
       const columns = await api('GET /v1/columns', null)
       setData(
         produce((draft: State) => {
           draft.columns = columns
         }),
       )
-
+      //カード一覧      //カードの並び替え  //複数の非同期処理を全て実行する 配列で記述
       const [unorderedCards, cardsOrder] = await Promise.all([
         api('GET /v1/cards', null),
         api('GET /v1/cardsOrder', null),
@@ -83,6 +95,7 @@ export const App = () => {
     api('PATCH /v1/cardsOrder', patch)
   }
 
+  //入力データをセットする
   const setText = (columnID: ColumnID, value: string) => {
     setData(
       produce((draft: State) => {
@@ -92,7 +105,7 @@ export const App = () => {
       }),
     )
   }
-
+  //カードCreate
   const addCard = (columnID: ColumnID) => {
     const column = columns?.find((c) => c.id === columnID)
     if (!column) return
@@ -104,12 +117,14 @@ export const App = () => {
       produce((draft: State) => {
         const column = draft.columns?.find((c) => c.id === columnID)
         if (!column?.cards) return
-
+        //作成したカードを先頭に配置
         column.cards.unshift({
           id: cardID,
           text: column.text,
         })
+        //カード作成後入力したテキストを消す
         column.text = ''
+
         draft.cardsOrder = {
           ...draft.cardsOrder,
           ...patch,

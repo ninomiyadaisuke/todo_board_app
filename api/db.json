@@ -19,34 +19,6 @@
   ],
   "cards": [
     {
-      "id": "nYt9C8TI3S5W",
-      "text": "tr"
-    },
-    {
-      "id": "6FW-q849trGe",
-      "text": "sfs"
-    },
-    {
-      "id": "4xabUmldPf5I",
-      "text": "sdfsdf"
-    },
-    {
-      "id": "wm-8RyNL6fbw",
-      "text": "sdsd"
-    },
-    {
-      "id": "9HXbjf_B3Wsd",
-      "text": "rgdfg"
-    },
-    {
-      "id": "o43VnIpyC3lR",
-      "text": "gdsf"
-    },
-    {
-      "id": "mIh9NPJGHGWg",
-      "text": "qqq"
-    },
-    {
       "id": "_Q9EHgc1MAqs",
       "text": "aaa"
     },
@@ -60,19 +32,12 @@
     }
   ],
   "cardsOrder": {
-    "cXrtw5n8-FsB": "7w1-r8OWOqF8",
-    "w7DTqK1QQKTI": "6FW-q849trGe",
-    "bfrqTfEydU38": "nYt9C8TI3S5W",
+    "cXrtw5n8-FsB": "LPU8fIFjsQB3",
+    "w7DTqK1QQKTI": "w7DTqK1QQKTI",
+    "bfrqTfEydU38": "bfrqTfEydU38",
     "dfwMbxZS0EmM": "dfwMbxZS0EmM",
-    "nYt9C8TI3S5W": "4xabUmldPf5I",
-    "6FW-q849trGe": "w7DTqK1QQKTI",
-    "4xabUmldPf5I": "bfrqTfEydU38",
-    "wm-8RyNL6fbw": "cXrtw5n8-FsB",
-    "9HXbjf_B3Wsd": "wm-8RyNL6fbw",
-    "o43VnIpyC3lR": "9HXbjf_B3Wsd",
-    "mIh9NPJGHGWg": "o43VnIpyC3lR",
-    "_Q9EHgc1MAqs": "mIh9NPJGHGWg",
+    "_Q9EHgc1MAqs": "7w1-r8OWOqF8",
     "LPU8fIFjsQB3": "_Q9EHgc1MAqs",
-    "7w1-r8OWOqF8": "LPU8fIFjsQB3"
+    "7w1-r8OWOqF8": "cXrtw5n8-FsB"
   }
 }
