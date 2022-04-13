@@ -19,25 +19,15 @@
   ],
   "cards": [
     {
-      "id": "_Q9EHgc1MAqs",
-      "text": "aaa"
-    },
-    {
-      "id": "LPU8fIFjsQB3",
-      "text": "hhhh"
-    },
-    {
       "id": "7w1-r8OWOqF8",
       "text": "aaaa"
     }
   ],
   "cardsOrder": {
-    "cXrtw5n8-FsB": "LPU8fIFjsQB3",
+    "cXrtw5n8-FsB": "cXrtw5n8-FsB",
     "w7DTqK1QQKTI": "7w1-r8OWOqF8",
     "bfrqTfEydU38": "bfrqTfEydU38",
     "dfwMbxZS0EmM": "dfwMbxZS0EmM",
-    "_Q9EHgc1MAqs": "cXrtw5n8-FsB",
-    "LPU8fIFjsQB3": "_Q9EHgc1MAqs",
     "7w1-r8OWOqF8": "w7DTqK1QQKTI"
   }
 }
