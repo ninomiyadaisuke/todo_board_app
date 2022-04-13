@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
-import { randomID, reorderPatch } from './util'
-import { api, ColumnID, CardID } from './api'
+import { api } from './api'
 import { Header as _Header } from './Header'
 import { Column } from './Column'
 import { DeleteDialog } from './DeleteDialog'
@@ -10,9 +9,7 @@ import { Overlay as _Overlay } from './Overlay'
 
 export const App = () => {
   const dispatch = useDispatch()
-  const draggingCardID = useSelector((state) => state.draggingCardID)
   const columns = useSelector((state) => state.columns)
-  const cardsOrder = useSelector((state) => state.cardsOrder)
   const cardIsBeingDeleted = useSelector((state) =>
     Boolean(state.deletingCardID),
   )
@@ -57,14 +54,7 @@ export const App = () => {
           {!columns ? (
             <Loading />
           ) : (
-            columns.map(({ id: columnID, title, cards }) => (
-              <Column
-                key={columnID}
-                id={columnID}
-                title={title}
-                cards={cards}
-              />
-            ))
+            columns.map(({ id }) => <Column key={id} id={id} />)
           )}
         </HorizontalScroll>
       </MainArea>
