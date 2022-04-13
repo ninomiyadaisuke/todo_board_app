@@ -33,13 +33,21 @@ export const App = () => {
       },
     })
   }
-  const [draggingCardID, setDraggingCardID] = useState<CardID | undefined>(
-    undefined,
-  )
+
+  const draggingCardID = useSelector((state) => state.draggingCardID)
   const columns = useSelector((state) => state.columns)
   const cardsOrder = useSelector((state) => state.cardsOrder)
   // TODO ビルドを通すためだけのスタブ実装なので、ちゃんとしたものにする
   const setData = (fn) => fn({ cardsOrder: {} })
+
+  const setDraggingCardID = (cardID: CardID) => {
+    dispatch({
+      type: 'Card.SetDeletingCard.StartDragging',
+      payload: {
+        cardID,
+      },
+    })
+  }
 
   const cardIsBeingDeleted = useSelector((state) =>
     Boolean(state.deletingCardID),
@@ -85,25 +93,16 @@ export const App = () => {
   const dropCardTo = (toID: CardID | ColumnID) => {
     const cardID = draggingCardID
     if (!cardID) return
-    setDraggingCardID(undefined)
     if (cardID === toID) return
 
     const patch = reorderPatch(cardsOrder, cardID, toID)
     //columnsの型を定義
-    setData(
-      produce((draft: State) => {
-        draft.cardsOrder = {
-          ...draft.cardsOrder,
-          ...patch,
-        }
-
-        const unorderedCards =
-          draft.columns?.flatMap((c) => c.cards ?? []) ?? []
-        draft.columns?.forEach((column) => {
-          column.cards = sortBy(unorderedCards, draft.cardsOrder, column.id)
-        })
-      }),
-    )
+    dispatch({
+      type: 'Card.SetDeletingCard.Drop',
+      payload: {
+        toID,
+      },
+    })
     api('PATCH /v1/cardsOrder', patch)
   }
 

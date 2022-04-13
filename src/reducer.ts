@@ -16,6 +16,7 @@ export type State = {
   }[]
   cardsOrder: Record<string, CardID | ColumnID | null>
   deletingCardID?: CardID
+  draggingCardID?: CardID
 }
 
 const initialState: State = {
@@ -62,7 +63,18 @@ export type Action =
   | {
       type: 'Dialog.CancelDelete'
     }
-
+  | {
+      type: 'Card.StartDragging'
+      payload: {
+        cardID: CardID
+      }
+    }
+  | {
+      type: 'Card.Drop'
+      payload: {
+        toID: CardID
+      }
+    }
 export const reducer: Reducer<State, Action> = produce(
   (draft: State, action: Action) => {
     switch (action.type) {
@@ -116,6 +128,36 @@ export const reducer: Reducer<State, Action> = produce(
 
       case 'Dialog.CancelDelete': {
         draft.deletingCardID = undefined
+        return
+      }
+
+      case 'Card.StartDragging': {
+        const { cardID } = action.payload
+
+        draft.draggingCardID = cardID
+        return
+      }
+
+      case 'Card.Drop': {
+        const fromID = draft.draggingCardID
+        if (!fromID) return
+
+        draft.draggingCardID = undefined
+
+        const { toID } = action.payload
+        if (fromID === toID) return
+
+        const patch = reorderPatch(draft.cardsOrder, fromID, toID)
+        draft.cardsOrder = {
+          ...draft.cardsOrder,
+          ...patch,
+        }
+
+        const unorderedCards =
+          draft.columns?.flatMap((c) => c.cards ?? []) ?? []
+        draft.columns?.forEach((column) => {
+          column.cards = sortBy(unorderedCards, draft.cardsOrder, column.id)
+        })
         return
       }
 
