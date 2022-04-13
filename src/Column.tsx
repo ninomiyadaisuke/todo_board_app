@@ -11,9 +11,6 @@ export const Column = ({
   id: columnID,
   title,
   cards: rawCards,
-  text,
-  onTextChange,
-  onTextConfirm,
 }: // onTextCancel,
 {
   title?: string
@@ -23,9 +20,6 @@ export const Column = ({
     text?: string
   }[]
   id: ColumnID
-  text?: string
-  onTextChange(value: string): void
-  onTextConfirm(): void
   // onTextCancel(): void
 }) => {
   const filterValue = useSelector((state) => state.filterValue.trim())
@@ -36,9 +30,6 @@ export const Column = ({
   const totalCount = rawCards?.length as number
   const [inputMode, setInputMode] = useState(false)
   const toggleInput = () => setInputMode((v) => !v)
-  const confirmInput = () => {
-    onTextConfirm()
-  }
   const cancelInput = () => {
     setInputMode(false)
     // onTextCancel?.()
@@ -55,14 +46,7 @@ export const Column = ({
 
         <AddButton onClick={toggleInput} />
       </Header>
-      {inputMode && (
-        <InputForm
-          value={text}
-          onChange={onTextChange}
-          onConfirm={confirmInput}
-          onCancel={cancelInput}
-        />
-      )}
+      {inputMode && <InputForm onCancel={cancelInput} columnID={columnID} />}
 
       {!cards ? (
         <Loading />

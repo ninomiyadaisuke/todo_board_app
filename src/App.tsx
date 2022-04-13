@@ -48,40 +48,6 @@ export const App = () => {
     })()
   }, [dispatch])
 
-  //入力データをセットする
-  const setText = (columnID: ColumnID, value: string) => {
-    dispatch({
-      type: 'InputForm.SetText',
-      payload: {
-        columnID,
-        value,
-      },
-    })
-  }
-  //カードCreate
-  const addCard = (columnID: ColumnID) => {
-    const column = columns?.find((c) => c.id === columnID)
-    if (!column) return
-
-    const text = column.text
-    const cardID = randomID() as CardID
-    const patch = reorderPatch(cardsOrder, cardID, cardsOrder[columnID])
-
-    dispatch({
-      type: 'InputForm.ConfirmInput',
-      payload: {
-        columnID,
-        cardID,
-      },
-    })
-
-    api('POST /v1/cards', {
-      id: cardID,
-      text,
-    })
-    api('PATCH /v1/cardsOrder', patch)
-  }
-
   return (
     <Container>
       <Header />
@@ -91,15 +57,12 @@ export const App = () => {
           {!columns ? (
             <Loading />
           ) : (
-            columns.map(({ id: columnID, title, cards, text }) => (
+            columns.map(({ id: columnID, title, cards }) => (
               <Column
                 key={columnID}
                 id={columnID}
                 title={title}
                 cards={cards}
-                text={text}
-                onTextChange={(value) => setText(columnID, value)}
-                onTextConfirm={() => addCard(columnID)}
               />
             ))
           )}
