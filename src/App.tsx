@@ -13,26 +13,10 @@ export const App = () => {
   const draggingCardID = useSelector((state) => state.draggingCardID)
   const columns = useSelector((state) => state.columns)
   const cardsOrder = useSelector((state) => state.cardsOrder)
-
-  const setDraggingCardID = (cardID: CardID) => {
-    dispatch({
-      type: 'Card.StartDragging',
-      payload: {
-        cardID,
-      },
-    })
-  }
-
   const cardIsBeingDeleted = useSelector((state) =>
     Boolean(state.deletingCardID),
   )
-  const setDeletingCardID = (cardID: CardID) =>
-    dispatch({
-      type: 'Card.SetDeletingCard',
-      payload: {
-        cardID,
-      },
-    })
+
   const cancelDelete = () =>
     dispatch({
       type: 'Dialog.CancelDelete',
@@ -63,22 +47,6 @@ export const App = () => {
       })
     })()
   }, [dispatch])
-
-  const dropCardTo = (toID: CardID | ColumnID) => {
-    const cardID = draggingCardID
-    if (!cardID) return
-    if (cardID === toID) return
-
-    const patch = reorderPatch(cardsOrder, cardID, toID)
-    //columnsの型を定義
-    dispatch({
-      type: 'Card.Drop',
-      payload: {
-        toID,
-      },
-    })
-    api('PATCH /v1/cardsOrder', patch)
-  }
 
   //入力データをセットする
   const setText = (columnID: ColumnID, value: string) => {
@@ -126,11 +94,9 @@ export const App = () => {
             columns.map(({ id: columnID, title, cards, text }) => (
               <Column
                 key={columnID}
+                id={columnID}
                 title={title}
                 cards={cards}
-                onCardDragStart={(cardID) => setDraggingCardID(cardID)}
-                onCardDrop={(entered) => dropCardTo(entered ?? columnID)}
-                onCardDeleteClick={(cardID) => setDeletingCardID(cardID)}
                 text={text}
                 onTextChange={(value) => setText(columnID, value)}
                 onTextConfirm={() => addCard(columnID)}

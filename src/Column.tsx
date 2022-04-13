@@ -5,14 +5,12 @@ import * as color from './color'
 import { Card } from './Card'
 import { PlusIcon } from './icon'
 import { InputForm as _InputForm } from './InputForm'
-import { CardID } from './api'
+import { CardID, ColumnID } from './api'
 
 export const Column = ({
+  id: columnID,
   title,
   cards: rawCards,
-  onCardDragStart,
-  onCardDrop,
-  onCardDeleteClick,
   text,
   onTextChange,
   onTextConfirm,
@@ -24,9 +22,7 @@ export const Column = ({
     id: CardID
     text?: string
   }[]
-  onCardDragStart?(id: CardID): void
-  onCardDrop?(entered: CardID | null): void
-  onCardDeleteClick: (cardID: CardID) => void
+  id: ColumnID
   text?: string
   onTextChange(value: string): void
   onTextConfirm(): void
@@ -39,11 +35,7 @@ export const Column = ({
   )
   const totalCount = rawCards?.length as number
   const [inputMode, setInputMode] = useState(false)
-  const [draggingCardID, setDraggingCardID] = useState<CardID | undefined>(
-    undefined,
-  )
   const toggleInput = () => setInputMode((v) => !v)
-
   const confirmInput = () => {
     onTextConfirm()
   }
@@ -52,10 +44,7 @@ export const Column = ({
     // onTextCancel?.()
   }
 
-  const handleCardDragStart = (id: CardID) => {
-    setDraggingCardID(id)
-    onCardDragStart?.(id)
-  }
+  const draggingCardID = useSelector((state) => state.deletingCardID)
 
   return (
     <Container>
@@ -81,34 +70,29 @@ export const Column = ({
         <>
           {filterValue && <ResultCount>{cards.length} results</ResultCount>}
           <VerticalScroll>
-            {cards.map(({ id, text }, i) => {
+            {cards.map(({ id }, i) => {
               return (
                 <Card.DropArea
                   key={id}
+                  targetID={id}
                   disabled={
                     draggingCardID !== undefined &&
                     (id === draggingCardID ||
                       cards[i - 1]?.id === draggingCardID)
                   }
-                  onDrop={() => onCardDrop?.(id)}
                 >
-                  <Card
-                    text={text}
-                    onDragStart={() => handleCardDragStart(id)}
-                    onDragEnd={() => setDraggingCardID(undefined)}
-                    onDeleteClick={() => onCardDeleteClick(id)}
-                  />
+                  <Card id={id} />
                 </Card.DropArea>
               )
             })}
             {/* カードを末尾に持っていく */}
             <Card.DropArea
+              targetID={columnID}
               style={{ height: '100%' }}
               disabled={
                 draggingCardID !== undefined &&
                 cards[cards.length - 1]?.id === draggingCardID
               }
-              onDrop={() => onCardDrop?.(null)}
             />
           </VerticalScroll>
         </>
