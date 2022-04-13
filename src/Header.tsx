@@ -3,19 +3,11 @@ import styled from 'styled-components'
 import * as color from './color'
 import { CardFilter } from './CardFilter'
 
-export const Header = ({
-  filterValue,
-  onFilterChange,
-  className,
-}: {
-  filterValue?: string
-  onFilterChange: React.Dispatch<React.SetStateAction<string>>
-  className?: string
-}) => {
+export const Header = ({ className }: { className?: string }) => {
   return (
     <Container className={className}>
       <Logo>Kanban board</Logo>
-      <CardFilter value={filterValue} onChange={onFilterChange} />
+      <CardFilter />
     </Container>
   )
 }
