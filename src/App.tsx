@@ -1,26 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import produce from 'immer'
-import { randomID, sortBy, reorderPatch } from './util'
+import { randomID, reorderPatch } from './util'
 import { api, ColumnID, CardID } from './api'
 import { Header as _Header } from './Header'
 import { Column } from './Column'
 import { DeleteDialog } from './DeleteDialog'
 import { Overlay as _Overlay } from './Overlay'
-
-type State = {
-  columns?: {
-    id: ColumnID
-    title?: string
-    text?: string
-    cards?: {
-      id: CardID
-      text?: string
-    }[]
-  }[]
-  cardsOrder: Record<string, CardID | ColumnID | null>
-}
 
 export const App = () => {
   const dispatch = useDispatch()
@@ -37,8 +24,6 @@ export const App = () => {
   const draggingCardID = useSelector((state) => state.draggingCardID)
   const columns = useSelector((state) => state.columns)
   const cardsOrder = useSelector((state) => state.cardsOrder)
-  // TODO ビルドを通すためだけのスタブ実装なので、ちゃんとしたものにする
-  const setData = (fn) => fn({ cardsOrder: {} })
 
   const setDraggingCardID = (cardID: CardID) => {
     dispatch({
@@ -101,20 +86,20 @@ export const App = () => {
       type: 'Card.Drop',
       payload: {
         toID,
-      }
+      },
     })
     api('PATCH /v1/cardsOrder', patch)
   }
 
   //入力データをセットする
   const setText = (columnID: ColumnID, value: string) => {
-    setData(
-      produce((draft: State) => {
-        const column = draft.columns?.find((c) => c.id === columnID)
-        if (!column) return
-        column.text = value
-      }),
-    )
+    dispatch({
+      type: 'InputForm.SetText',
+      payload: {
+        columnID,
+        value,
+      },
+    })
   }
   //カードCreate
   const addCard = (columnID: ColumnID) => {
@@ -124,24 +109,15 @@ export const App = () => {
     const text = column.text
     const cardID = randomID() as CardID
     const patch = reorderPatch(cardsOrder, cardID, cardsOrder[columnID])
-    setData(
-      produce((draft: State) => {
-        const column = draft.columns?.find((c) => c.id === columnID)
-        if (!column?.cards) return
-        //作成したカードを先頭に配置
-        column.cards.unshift({
-          id: cardID,
-          text: column.text,
-        })
-        //カード作成後入力したテキストを消す
-        column.text = ''
 
-        draft.cardsOrder = {
-          ...draft.cardsOrder,
-          ...patch,
-        }
-      }),
-    )
+    dispatch({
+      type: 'InputForm.ConfirmInput',
+      payload: {
+        columnID,
+        cardID,
+      },
+    })
+
     api('POST /v1/cards', {
       id: cardID,
       text,
