@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { api } from './api'
 import { Header as _Header } from './Header'
 import { Column } from './Column'
@@ -9,16 +9,10 @@ import { Overlay as _Overlay } from './Overlay'
 
 export const App = () => {
   const dispatch = useDispatch()
-  const columns = useSelector((state) => state.columns)
-  const cardIsBeingDeleted = useSelector((state) =>
-    Boolean(state.deletingCardID),
+  const columns = useSelector(
+    (state) => state.columns?.map((v) => v.id),
+    shallowEqual,
   )
-
-  const cancelDelete = () =>
-    dispatch({
-      type: 'Dialog.CancelDelete',
-    })
-
   //columns cards cardsOrderを取得
   useEffect(() => {
     ;(async () => {
@@ -54,15 +48,11 @@ export const App = () => {
           {!columns ? (
             <Loading />
           ) : (
-            columns.map(({ id }) => <Column key={id} id={id} />)
+            columns.map((id) => <Column key={id} id={id} />)
           )}
         </HorizontalScroll>
       </MainArea>
-      {cardIsBeingDeleted && (
-        <Overlay onClick={cancelDelete}>
-          <DeleteDialog />
-        </Overlay>
-      )}
+      <DialogOverlay />
     </Container>
   )
 }
@@ -100,6 +90,28 @@ const HorizontalScroll = styled.div`
   }
 `
 
+function DialogOverlay() {
+  const dispatch = useDispatch()
+  const cardIsBeingDeleted = useSelector((state) =>
+    Boolean(state.deletingCardID),
+  )
+
+  const cancelDelete = () =>
+    dispatch({
+      type: 'Dialog.CancelDelete',
+    })
+
+  if (!cardIsBeingDeleted) {
+    return null
+  }
+
+  return (
+    <Overlay onClick={cancelDelete}>
+      <DeleteDialog />
+    </Overlay>
+  )
+}
+
 const Loading = styled.div.attrs({
   children: 'Loading...',
 })`
@@ -111,46 +123,3 @@ const Overlay = styled(_Overlay)`
   justify-content: center;
   align-items: center;
 `
-
-// const dropCardTo = (toID: string) => {
-//   const cardID = draggingCardID
-//   if (!cardID) return
-//   setDraggingCardID(undefined)
-//   if (cardID === toID) return
-//   setColumns((columns) => {
-//     //選択されたカード情報を抽出(オブジェクトで)
-//     const card = columns
-//       .flatMap((col) => col.cards)
-//       .find((c) => c.id === cardID)
-//     if (!card) {
-//       return columns
-//     }
-//     return columns.map((column) => {
-//       let newColumn = column
-//       //カラムからカードを消されたときの処理
-//       if (newColumn.cards.some((c) => c.id === cardID)) {
-//         newColumn = {
-//           ...newColumn,
-//           cards: newColumn.cards.filter((c) => c.id !== cardID),
-//         }
-//       }
-//       // // 列の末尾に移動
-//       if (newColumn.id === toID) {
-//         newColumn = {
-//           ...newColumn,
-//           cards: [...newColumn.cards, card],
-//         }
-//       }
-//       // 列の末尾以外に移動
-//       else if (newColumn.cards.some((c) => c.id === toID)) {
-//         newColumn = {
-//           ...newColumn,
-//           cards: newColumn.cards.flatMap((c) =>
-//             c.id === toID ? [card, c] : [c],
-//           ),
-//         }
-//       }
-//       return newColumn
-//     })
-//   })
-// }
