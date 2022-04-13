@@ -19,7 +19,7 @@ type State = {
       text?: string
     }[]
   }[]
-  cardsOrder: Record<string, CardID | ColumnID>
+  cardsOrder: Record<string, CardID | ColumnID | null>
 }
 
 export const App = () => {
@@ -36,35 +36,35 @@ export const App = () => {
   const [draggingCardID, setDraggingCardID] = useState<CardID | undefined>(
     undefined,
   )
-
-  const [{ columns, cardsOrder }, setData] = useState<State>({ cardsOrder: {} })
-
+  const columns = useSelector((state) => state.columns)
+  const cardsOrder = useSelector((state) => state.cardsOrder)
+  // TODO ビルドを通すためだけのスタブ実装なので、ちゃんとしたものにする
+  const setData = (fn) => fn({ cardsOrder: {} })
   //columns cards cardsOrderを取得
   useEffect(() => {
     ;(async () => {
       //columnsを取得しセットする
       const columns = await api('GET /v1/columns', null)
-      setData(
-        produce((draft: State) => {
-          draft.columns = columns
-        }),
-      )
+      dispatch({
+        type: 'App.SetColumns',
+        payload: {
+          columns,
+        },
+      })
       //カード一覧      //カードの並び替え  //複数の非同期処理を全て実行する 配列で記述
       const [unorderedCards, cardsOrder] = await Promise.all([
         api('GET /v1/cards', null),
         api('GET /v1/cardsOrder', null),
       ])
-
-      setData(
-        produce((draft: State) => {
-          draft.cardsOrder = cardsOrder
-          draft.columns?.forEach((column) => {
-            column.cards = sortBy(unorderedCards, cardsOrder, column.id)
-          })
-        }),
-      )
+      dispatch({
+        type: 'App.SetCards',
+        payload: {
+          cards: unorderedCards,
+          cardsOrder,
+        },
+      })
     })()
-  }, [])
+  }, [dispatch])
 
   const [deletingCardID, setDeletingCardID] = useState<CardID | undefined>(
     undefined,
