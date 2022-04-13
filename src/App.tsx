@@ -42,7 +42,7 @@ export const App = () => {
 
   const setDraggingCardID = (cardID: CardID) => {
     dispatch({
-      type: 'Card.SetDeletingCard.StartDragging',
+      type: 'Card.StartDragging',
       payload: {
         cardID,
       },
@@ -98,10 +98,10 @@ export const App = () => {
     const patch = reorderPatch(cardsOrder, cardID, toID)
     //columnsの型を定義
     dispatch({
-      type: 'Card.SetDeletingCard.Drop',
+      type: 'Card.Drop',
       payload: {
         toID,
-      },
+      }
     })
     api('PATCH /v1/cardsOrder', patch)
   }

@@ -72,7 +72,7 @@ export type Action =
   | {
       type: 'Card.Drop'
       payload: {
-        toID: CardID
+        toID: CardID | ColumnID
       }
     }
 export const reducer: Reducer<State, Action> = produce(
@@ -139,15 +139,15 @@ export const reducer: Reducer<State, Action> = produce(
       }
 
       case 'Card.Drop': {
-        const fromID = draft.draggingCardID
-        if (!fromID) return
+        const cardID = draft.draggingCardID
+        if (!cardID) return
 
         draft.draggingCardID = undefined
 
         const { toID } = action.payload
-        if (fromID === toID) return
+        if (cardID === toID) return
 
-        const patch = reorderPatch(draft.cardsOrder, fromID, toID)
+        const patch = reorderPatch(draft.cardsOrder, cardID, toID)
         draft.cardsOrder = {
           ...draft.cardsOrder,
           ...patch,
